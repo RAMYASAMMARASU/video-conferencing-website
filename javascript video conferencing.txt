@@ -1,0 +1,37 @@
+const simplePeer = new SimplePeer({ initiator: location.hash === '#initiator' });
+const localVideo = document.getElementById('localVideo');
+const remoteVideos = document.getElementById('remoteVideos');
+const chatInput = document.getElementById('chatInput');
+const sendChat = document.getElementById('sendChat');
+const chat = document.getElementById('chat');
+
+simplePeer.on('signal', data => {
+    // Share your signaling data with the other peer
+    const signalData = JSON.stringify(data);
+    // You would send this data to the other peer using a signaling server.
+    // For this example, we'll manually copy it.
+    navigator.clipboard.writeText(signalData);
+    console.log('Copy this signaling data and share it with the other peer:\n', signalData);
+});
+
+simplePeer.on('stream', stream => {
+    // Display your own video
+    localVideo.srcObject = stream;
+});
+
+simplePeer.on('data', data => {
+    // Handle received chat messages
+    const message = document.createElement('div');
+    message.textContent = 'Remote: ' + data.toString();
+    chat.appendChild(message);
+});
+
+sendChat.addEventListener('click', () => {
+    // Send chat message to the remote peer
+    const messageText = chatInput.value;
+    simplePeer.send(messageText);
+    const message = document.createElement('div');
+    message.textContent = 'You: ' + messageText;
+    chat.appendChild(message);
+    chatInput.value = '';
+});
